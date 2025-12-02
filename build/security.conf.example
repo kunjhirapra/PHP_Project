@@ -1,0 +1,43 @@
+# Security Configuration for Production
+# Add these to your Apache virtual host or include in .htaccess
+
+# Hide server information
+ServerTokens Prod
+ServerSignature Off
+
+# Security headers
+Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options DENY
+Header always set X-XSS-Protection "1; mode=block"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'"
+
+# PHP Security Settings
+php_flag display_errors Off
+php_flag log_errors On
+php_value error_log /var/log/php_errors.log
+php_flag expose_php Off
+php_value session.cookie_httponly 1
+php_value session.cookie_secure 1
+php_value session.use_strict_mode 1
+
+# Disable dangerous functions
+php_admin_value disable_functions "exec,passthru,shell_exec,system,proc_open,popen,curl_exec,curl_multi_exec,parse_ini_file,show_source"
+
+# File upload restrictions
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+php_value max_execution_time 30
+php_value max_input_time 60
+php_value memory_limit 128M
+
+# Rate limiting (if mod_evasive is available)
+<IfModule mod_evasive24.c>
+    DOSHashTableSize    2048
+    DOSPageCount        10
+    DOSPageInterval     1
+    DOSSiteCount        50
+    DOSSiteInterval     1
+    DOSBlockingPeriod   60
+</IfModule>
